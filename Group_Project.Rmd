@@ -1,0 +1,152 @@
+---
+title: "Global Carbon Emissions for Food Types"
+author: "Lydia Kajeckas, Nicholas Vasquez"
+date: "4/15/2020"
+output: ioslides_presentation
+---
+
+
+
+```{r}
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+library(ggplot2)
+```
+
+<!-- You can change the slide option and use slidy or consider the package xaringan to make more sophisticated presentations --->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment="")
+#library()
+```
+
+<!-- The slide names and number of slides created are just for demonstration - feel free to change slide titles and add more or remove slides -->
+
+## Abstract
+
+Food carbon emissions is a well known topic among those who study environmental impact and climate change. The food industry is known to be a top contributor in carbon dioxide (CO2) emissions. We have taken data from 130 nations and compared the CO2 emissions among meat and non-meat products, testing which produces more CO2 from a food production standpoint. We begin by testing if the population median for non-meat products is higher than meat products. Non-parametric methods are used since the data for non-meat products CO2 emission is not normally distributed. Our final results come from a binomial test, outlining the difference between CO2 production among our two groups. 
+
+## Motivation
+
+- We want to research the environmental impact that the food industry and diet have on carbon footprint  
+- Are carbon emissions for meat and nonmeat foods equal?  
+
+## Background  
+
+- The data is from 2013, and was collected and aggregated in 2018 by nu3, a German health food company. Kasia Kulma used web scraping to collect and format the data for the Tidy Tuesday challenge for the week of February 18, 2020. https://www.nu3.de/blogs/nutrition/food-carbon-footprint-index-2018   
+
+
+## ![Original Chart](originalchart.png){#id .class width=100% height=100%}
+
+
+# Methods  
+
+<!-- A single hashtag # will create a title type slide to create a clear distinction between sections of the presentation. -->
+
+## Methods Slide 1 - Data Collection
+
+The data was obtained from Github - Tidy Tuesday, and cleaned and reformatted in R. 
+
+$H_0: \theta = 217.84$ 
+The population median of CO2 emissions for meat products is equal to the CO2 emissions for non-meat products.  
+
+$H_1: \theta > 217.84$
+The population median of CO2 emissions for non-meat products is greater than the CO2 emissions for non-meat products.
+
+## Methods Slide 2 - Analytic Methods
+- Nonparametric methods are used because the data for carbon emissions is skewed right.  
+```{r}
+final = read.csv("Final.csv")
+histogram(final$co2_nonmeat+final$co2_meat, xlab= "Carbon Emissions")
+```
+
+
+# Results
+
+## Summary Statistics and Graphics
+
+```{r}
+gf_histogram(~co2_meat, data = final,
+             xlab = "CO2 Emissions of Meat Products",
+             ylab = "Number of Countries")
+```
+
+## Summary Statistics and Graphics
+Since the data for the CO2 meat column is right skewed, the population median, $\theta$, is a better value than population mean $\mu$ to use for measuring central tendency.
+```{r}
+gf_histogram(~co2_nonmeat, data = final,
+             xlab = "CO2 Emissions of Non-meat Products",
+             ylab = "Number of Countries", size = 10)
+```
+
+## Summary Statistics and Graphics
+```{r}
+"CO2 of Non-meat products"
+summary(final$co2_nonmeat)
+"CO2 of Meat products"
+summary(final$co2_meat)
+```
+
+
+## Analysis
+Provide analysis using nonparametric methods
+
+```{r}
+tally(~co2_meat > 217.84, data = final) #assumed median from hypothesis is that the meat co2 and nonmeat co2 are equal
+```
+
+```{r}
+pbinom(q= 110-1, size=130, prob = 0.5, lower.tail = FALSE) 
+```
+> There is a 1.496e-16 probability of observing 110 or more values about the true median assuming the true median is \theta= 217.84 kgs/year of co2 emissions, which means that it is HIGHLY unlikely for these numbers to be found by chance. Therefore, we reject the null hypothesis that the CO_2 emissions for meat and nonmeat foods are equivalent, and support the alternative hypothesis that meat foods have greater carbon emissions than nonmeat foods.
+
+```{r}
+wilcox.test(final$co2_meat, final$co2_nonmeat, mu=0, alternative = "greater", paired=TRUE)
+```
+
+$\eta_\text{m-n} = 0$ 
+The median differences in CO_2 levels for meat and nonmeat products is zero.
+
+$\eta_\text{m-n}>0$ 
+The median differences in CO_2 levels for meat and nonmeat products is greater than zero. 
+
+# Summary
+
+```{r}
+diff=final$co2_meat-final$co2_nonmeat
+median(diff)
+rank(diff)
+min(diff)
+max(diff)
+```
+
+```{r}
+boxplot(final$co2_meat, final$co2_nonmeat, horizontal = TRUE, names = c("Meat","Nonmeat"), xlab= "Kg CO_2/per person/per year")
+
+```
+
+
+## Conclusion  
+>There is strong evidence against the null hypothesis (p=value= 2.2e-16, V = 8289) that the median difference in CO2 Emissions for meat vs nonmeat products is zero. In addition the median difference is MD=223.05 on a scale -170.96 to 1532.24. Therefore, we have evidence to support the claim that the production of meat products produces more CO_2 than the production of nonmeat products.
+
+> Based on our binomial test, we conclude that there is a significant difference between the emissions associated with producing meat and the emissions associated with producing non-meat foods. 
+
+
+## Future Work
+
+> The data should be gathered and tested for more years than just 2013, so as to attempt to establish a trend. 
+
+## References
+
+https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-02-18/readme.md
+
+https://www.nu3.de/blogs/nutrition/food-carbon-footprint-index-2018
+
+
+```{r Notes}
+#wilcoxon, permutation. #paired data by country. consider paired analysis by country. compare whether or not most countries produce more co2 overall. do countries produce more co2 from meat or plant? 
+```
+
+
+
